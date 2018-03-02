@@ -1,5 +1,5 @@
 ﻿using FixedMath;
-
+using UnityEngine;
 /// <summary>
 /// Class representing a collider manifold, with all the info about the collision.
 /// </summary>
@@ -7,7 +7,7 @@ public class Manifold {
 
     private DBody bodyA;
     private DBody bodyB;
-    private Vector2F normal;
+    private Vector3F normal;
     private Fix32 penetration;
     private Fix32 restitution;
     private Fix32 totalInvMass;
@@ -23,7 +23,7 @@ public class Manifold {
     /// <param name="b">second rigid body</param>
     /// <param name="normal">collision normal</param>
     /// <param name="distance">penetration</param>
-    public Manifold(DBody a, DBody b, Vector2F normal, Fix32 penetration)
+    public Manifold(DBody a, DBody b, Vector3F normal, Fix32 penetration)
     {
         this.bodyA = a;
         this.bodyB = b;
@@ -48,7 +48,7 @@ public class Manifold {
     /// <summary>
     /// Returns the collision normal
     /// </summary>
-    public Vector2F Normal {
+    public Vector3F Normal {
         get { return this.normal; }
     }
 
@@ -95,13 +95,13 @@ public class Manifold {
     /// </summary>
     /// <param name="collision">Intersection instance containing all the collision data.</param>
     public void ApplyImpulse() {
-        Vector2F dv = bodyB.Velocity - bodyA.Velocity;
-        Fix32 vn = Vector2F.Dot(dv, normal);
+        Vector3F dv = bodyB.Velocity - bodyA.Velocity;
+        Fix32 vn = Vector3F.Dot(dv, normal);
 
-        Fix32 imp = ((-((Fix32)1 +restitution) * vn + bias)) / totalInvMass;
+        Fix32 imp = ((-((Fix32)1 + restitution) * vn + bias)) / totalInvMass;
         imp = Fix32.Max(imp, (Fix32)0);
 
-        Vector2F impulse = normal * imp;
+        Vector3F impulse = normal * imp;
         bodyA.Velocity -= impulse * bodyA.InvMass;
         bodyB.Velocity += impulse * bodyB.InvMass;
     }

@@ -60,12 +60,12 @@ public class QuadtreeNode<T> where T : DBody {
     }
 
     public bool Intersects(DCollider collider) {
-        DBoxCollider bbox = (collider.Type == ColliderType.Box) ? (DBoxCollider)collider : ((DCircleCollider)collider).BoundingBox;
+        DBox3DCollider bbox = (collider.Type == ColliderType.Box3D) ? (DBox3DCollider)collider : ((DSphereCollider)collider).BoundingBox;
         Vector2F min = position;
         Vector2F max = position + Vector2F.One * size;
 
-        if (max.x < bbox.Min.x || min.x > bbox.Max.x) return false;
-        if (max.y < bbox.Min.y || min.y > bbox.Max.y) return false;
+        //if (max.x < bbox.Min.x || min.x > bbox.Max.x) return false;
+        //if (max.y < bbox.Min.y || min.y > bbox.Max.y) return false;
         return true;
     }
 

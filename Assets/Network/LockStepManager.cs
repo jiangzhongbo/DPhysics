@@ -3,10 +3,10 @@ using FixedMath;
 
 public class LockStepManager : MonoBehaviour {
 
-    private DWorld physics;
+    public DWorld physics;
 
     //game update frequency in ms
-    private const int rate = 50;
+    private const int rate = 1;
 
     private Fix32 accumulator;
     private Fix32 fixedDelta;
@@ -22,7 +22,7 @@ public class LockStepManager : MonoBehaviour {
 	
 	// Updates the physics
 	void Update () {
-        Fix32 delta = (Fix32)Time.deltaTime;
+        Fix32 delta = (Fix32)Time.deltaTime * (Fix32)1f;
         if (delta > (Fix32)0.25f)
             delta = (Fix32)0.25f;
         this.accumulator += delta;

@@ -8,6 +8,6 @@ public abstract class ColliderComponent : MonoBehaviour {
 
     public bool drawCollider = true;
     public bool isTrigger = false;
-
+    public bool isDebug = false;
     public abstract DCollider RequireCollider();
 }

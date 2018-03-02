@@ -5,7 +5,7 @@ using System.Collections;
 /// Enum for the different collider types.
 /// </summary>
 public enum ColliderType {
-    Box,
-    Circle,
-    Plane
+    Sphere,
+    Box3D,
+    Capsule,
 }

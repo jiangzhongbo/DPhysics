@@ -3,7 +3,8 @@
 
 using System;
 
-namespace FixedMath {
+namespace FixedMath
+{
 
     /// <summary>
     /// Structure for fixed point calculations.
@@ -13,12 +14,17 @@ namespace FixedMath {
     /// while multiplication and division require an extra shifting to maintain the scale, reducing the range to 31
     /// (see SafeMinVal).
     /// </summary>
-    public struct Fix32 : IEquatable<Fix32>, IComparable<Fix32> {
+    public struct Fix32 : IEquatable<Fix32>, IComparable<Fix32>
+    {
 
         public const int SHIFT = 16;
         public const int NBITS = 64;
         public const int NSQRT = 8;
         public const long ONE = 1L << SHIFT;
+        public const long PI = (355 * ONE) / 113;
+        public const long TWO_PI = PI * 2;
+        public const long RAD_2_DEG = 360 / TWO_PI;
+        public const long DEG_2_RAD = TWO_PI / 360;
         public const long RealMaxValue = 140737488355327L;  //max number reachable with sums  (2^37-1)
         public const long RealMinValue = -140737488355328L; //min number reachable with subs -(2^37)
         public const long SafeMaxValue = 2147483647L;       //max number reachable with mul/div  (2^31-1)
@@ -28,26 +34,42 @@ namespace FixedMath {
         public static readonly Fix32 MinValue = new Fix32(long.MinValue);
         public static readonly Fix32 One = new Fix32(ONE);
         public static readonly Fix32 Zero = new Fix32(0L);
+        public static readonly Fix32 Pi = new Fix32(PI);
+        public static readonly Fix32 TwoPi = new Fix32(TWO_PI);
+        public static readonly Fix32 Rad2Deg = new Fix32(RAD_2_DEG);
+        public static readonly Fix32 Deg2Rad = new Fix32(DEG_2_RAD);
         private static readonly Fix32 Half = (One >> 1);
         private static readonly Fix32 ThreeHalfs = (One + Half);
 
         private long rawValue;
 
+        public static Fix32 Create(long Numerator, long Denominator)
+        {
+            Fix32 v = new Fix32();
+            v.rawValue = (Numerator << SHIFT) / Denominator;
+            return v;
+        }
+
         #region Constructors
 
-        public Fix32(int value) {
+
+        public Fix32(int value)
+        {
             this.rawValue = ((long)value) << SHIFT;
         }
 
-        public Fix32(float value) {
+        public Fix32(float value)
+        {
             this.rawValue = (long)(value * ONE);
         }
 
-        public Fix32(double value) {
+        public Fix32(double value)
+        {
             this.rawValue = (long)(value * ONE);
         }
 
-        private Fix32(long value) {
+        private Fix32(long value)
+        {
             this.rawValue = value;
         }
 
@@ -55,7 +77,8 @@ namespace FixedMath {
 
         #region Operators
 
-        public static Fix32 operator +(Fix32 a, Fix32 b) {
+        public static Fix32 operator +(Fix32 a, Fix32 b)
+        {
             long sum = a.rawValue + b.rawValue;
 #if (OVERFLOW)
             if (((a.rawValue ^ sum) & (b.rawValue ^ sum)) >> (NBITS - 1) != 0) {
@@ -65,7 +88,8 @@ namespace FixedMath {
             return new Fix32(sum);
         }
 
-        public static Fix32 operator -(Fix32 a, Fix32 b) {
+        public static Fix32 operator -(Fix32 a, Fix32 b)
+        {
             long diff = a.rawValue - b.rawValue;
 #if (OVERFLOW)
             if ((~(a.rawValue ^ b.rawValue) & (diff & a.rawValue)) < 0) {
@@ -75,11 +99,13 @@ namespace FixedMath {
             return new Fix32(diff);
         }
 
-        public static Fix32 operator -(Fix32 val) {
+        public static Fix32 operator -(Fix32 val)
+        {
             return val == MinValue ? MaxValue : new Fix32(-val.rawValue);
         }
 
-        public static Fix32 operator *(Fix32 a, Fix32 b) {
+        public static Fix32 operator *(Fix32 a, Fix32 b)
+        {
 #if (OVERFLOW)
             if (b.rawValue > ONE && a.rawValue > SafeMaxValue / b.rawValue)
                 throw new System.OverflowException();
@@ -87,43 +113,53 @@ namespace FixedMath {
             return new Fix32((a.rawValue * b.rawValue) >> SHIFT);
         }
 
-        public static Fix32 operator /(Fix32 a, Fix32 b) {
+        public static Fix32 operator /(Fix32 a, Fix32 b)
+        {
             return new Fix32((a.rawValue << SHIFT) / b.rawValue);
         }
 
-        public static Fix32 operator %(Fix32 a, Fix32 b) {
+        public static Fix32 operator %(Fix32 a, Fix32 b)
+        {
             return new Fix32(a.rawValue % b.rawValue);
         }
 
-        public static bool operator ==(Fix32 a, Fix32 b) {
+        public static bool operator ==(Fix32 a, Fix32 b)
+        {
             return a.rawValue == b.rawValue;
         }
 
-        public static bool operator !=(Fix32 a, Fix32 b) {
+        public static bool operator !=(Fix32 a, Fix32 b)
+        {
             return !(a.rawValue == b.rawValue);
         }
 
-        public static bool operator >(Fix32 a, Fix32 b) {
+        public static bool operator >(Fix32 a, Fix32 b)
+        {
             return a.rawValue > b.rawValue;
         }
 
-        public static bool operator <(Fix32 a, Fix32 b) {
+        public static bool operator <(Fix32 a, Fix32 b)
+        {
             return a.rawValue < b.rawValue;
         }
 
-        public static bool operator >=(Fix32 a, Fix32 b) {
+        public static bool operator >=(Fix32 a, Fix32 b)
+        {
             return a.rawValue >= b.rawValue;
         }
 
-        public static bool operator <=(Fix32 a, Fix32 b) {
+        public static bool operator <=(Fix32 a, Fix32 b)
+        {
             return a.rawValue <= b.rawValue;
         }
 
-        public static Fix32 operator <<(Fix32 n, int shift) {
+        public static Fix32 operator <<(Fix32 n, int shift)
+        {
             return new Fix32(n.rawValue << shift);
         }
 
-        public static Fix32 operator >>(Fix32 n, int shift) {
+        public static Fix32 operator >>(Fix32 n, int shift)
+        {
             return new Fix32(n.rawValue >> shift);
         }
 
@@ -131,35 +167,43 @@ namespace FixedMath {
 
         #region Casting
 
-        public static explicit operator Fix32(int value) {
+        public static explicit operator Fix32(int value)
+        {
             return new Fix32(value);
         }
 
-        public static explicit operator int(Fix32 value) {
-            return (int) (value.rawValue >> SHIFT);
+        public static explicit operator int(Fix32 value)
+        {
+            return (int)(value.rawValue >> SHIFT);
         }
 
-        public static explicit operator Fix32(long value) {
+        public static explicit operator Fix32(long value)
+        {
             return new Fix32(value << SHIFT);
         }
 
-        public static explicit operator long(Fix32 value) {
+        public static explicit operator long(Fix32 value)
+        {
             return value.rawValue >> SHIFT;
         }
 
-        public static explicit operator Fix32(float value) {
+        public static explicit operator Fix32(float value)
+        {
             return new Fix32(value);
         }
 
-        public static explicit operator float(Fix32 value) {
+        public static explicit operator float(Fix32 value)
+        {
             return (float)value.rawValue / ONE;
         }
 
-        public static explicit operator Fix32(double value) {
+        public static explicit operator Fix32(double value)
+        {
             return new Fix32(value);
         }
 
-        public static explicit operator double(Fix32 value) {
+        public static explicit operator double(Fix32 value)
+        {
             return (double)value.rawValue / ONE;
         }
 
@@ -167,23 +211,28 @@ namespace FixedMath {
 
         #region Inherited
 
-        public bool Equals(Fix32 other) {
+        public bool Equals(Fix32 other)
+        {
             return this == other;
         }
 
-        public int CompareTo(Fix32 other) {
+        public int CompareTo(Fix32 other)
+        {
             return (int)(this - other);
         }
 
-        public override bool Equals(object obj) {
+        public override bool Equals(object obj)
+        {
             return (obj is Fix32) ? (this == ((Fix32)obj)) : false;
         }
 
-        public override int GetHashCode() {
+        public override int GetHashCode()
+        {
             return rawValue.GetHashCode();
         }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return rawValue.ToString();
         }
 
@@ -196,8 +245,9 @@ namespace FixedMath {
         /// </summary>
         /// <param name="val">the given value</param>
         /// <returns>the absolute value</returns>
-        public static Fix32 Abs(Fix32 val) {
-            long mask = val.rawValue >> (NBITS-1);
+        public static Fix32 Abs(Fix32 val)
+        {
+            long mask = val.rawValue >> (NBITS - 1);
             return new Fix32((val.rawValue + mask) ^ mask);
         }
 
@@ -206,7 +256,8 @@ namespace FixedMath {
         /// </summary>
         /// <param name="val">the given value</param>
         /// <returns>the clamped value</returns>
-        public static Fix32 Clamp(Fix32 val, Fix32 min, Fix32 max) {
+        public static Fix32 Clamp(Fix32 val, Fix32 min, Fix32 max)
+        {
             return (val > max) ? max : (val < min) ? min : val;
         }
 
@@ -216,7 +267,8 @@ namespace FixedMath {
         /// <param name="a">first value</param>
         /// <param name="b">second value</param>
         /// <returns>max value</returns>
-        public static Fix32 Max(Fix32 a, Fix32 b) {
+        public static Fix32 Max(Fix32 a, Fix32 b)
+        {
             return (a > b) ? a : b;
         }
 
@@ -226,7 +278,8 @@ namespace FixedMath {
         /// <param name="a">first value</param>
         /// <param name="b">second value</param>
         /// <returns>min value</returns>
-        public static Fix32 Min(Fix32 a, Fix32 b) {
+        public static Fix32 Min(Fix32 a, Fix32 b)
+        {
             return (a < b) ? a : b;
         }
 
@@ -237,7 +290,8 @@ namespace FixedMath {
         /// <param name="val">the given value</param>
         /// <param name="iterations">number of iterations</param>
         /// <returns>Approximation of the squared root.</returns>
-        public static Fix32 Sqrt(Fix32 val, int iterations) {
+        public static Fix32 Sqrt(Fix32 val, int iterations)
+        {
             if (val.rawValue < 0)
                 throw new ArithmeticException("Negative value");
 
@@ -245,10 +299,12 @@ namespace FixedMath {
                 return Fix32.Zero;
 
             Fix32 res = val + Fix32.One >> 1;
-            for (uint i = 0; i < iterations; i++) {
+            for (uint i = 0; i < iterations; i++)
+            {
                 res = (res + (val / res)) >> 1;
             }
-            if (res.rawValue < 0) {
+            if (res.rawValue < 0)
+            {
                 throw new ArithmeticException("Overflow");
             }
             return res;
@@ -259,7 +315,8 @@ namespace FixedMath {
         /// </summary>
         /// <param name="val">the given value</param>
         /// <returns>(Approximation of) the squared root of the value</returns>
-        public static Fix32 Sqrt(Fix32 val) {
+        public static Fix32 Sqrt(Fix32 val)
+        {
             return Sqrt(val, NSQRT);
         }
 
@@ -270,15 +327,104 @@ namespace FixedMath {
         /// </summary>
         /// <param name="val">the given value</param>
         /// <returns>approximation of the inverse square root</returns>
-        public static Fix32 InvSqrt(Fix32 val) {
+        public static Fix32 InvSqrt(Fix32 val)
+        {
             Fix32 halfval = val >> 1;
             Fix32 g = halfval;
-            for (ushort i = 0; i < 8; i++) {
+            for (ushort i = 0; i < 8; i++)
+            {
                 g = g * (ThreeHalfs - halfval * g * g);
             }
             return g;
         }
 
+        public static Fix32 Normalized(Fix32 f1, Fix32 range)
+        {
+            while (f1 < Fix32.Zero)
+                f1 += range;
+            if (f1 >= range)
+                f1 = f1 % range;
+            return f1;
+        }
+
         #endregion
+    }
+
+    public static class Trig
+    {
+        public static Fix32 Rad2Deg = Fix32.Create(572958, 10000);
+        public static Fix32 Sin(Fix32 theta)
+        {
+
+            theta = Fix32.Normalized(theta, Fix32.TwoPi);
+
+            bool mirror = false;
+            bool flip = false;
+            int quadrant = (int)(theta / (Fix32.Pi / (Fix32)2));
+            switch (quadrant)
+            {
+                case 0:
+                    break;
+                case 1:
+                    mirror = true;
+                    break;
+                case 2:
+                    flip = true;
+                    break;
+                case 3:
+                    mirror = true;
+                    flip = true;
+                    break;
+            }
+            theta = Fix32.Normalized(theta, Fix32.Pi / (Fix32)2);
+            if (mirror)
+            {
+                theta = Fix32.Pi / (Fix32)2 - theta;
+            }
+
+            Fix32 thetaSquared = theta * theta;
+
+            Fix32 result = theta;
+
+            Fix32 n = theta * theta * theta;
+            Fix32 Factorial3 = (Fix32)3 * (Fix32)2 * Fix32.One;
+            result -= n / Factorial3;
+
+            n *= thetaSquared;
+            Fix32 Factorial5 = Factorial3 * (Fix32)4 * (Fix32)5;
+            result += (n / Factorial5);
+
+            n *= thetaSquared;
+            Fix32 Factorial7 = Factorial5 * (Fix32)6 * (Fix32)7;
+            result -= n / Factorial7;
+
+            if (flip)
+            {
+                result *= -(Fix32)1;
+            }
+            return result;
+        }
+        public static Fix32 Cos(Fix32 theta)
+        {
+            Fix32 sin = Sin(theta);
+            Fix32 cos = Fix32.Sqrt(Fix32.One - (sin * sin));
+            if (Fix32.Pi / (Fix32)2 < theta && theta < Fix32.Pi * (Fix32)3 / (Fix32)2)
+            {
+                cos = -cos;
+            }
+            else if (-Fix32.Pi * (Fix32)3 / (Fix32)2 < theta && theta < -Fix32.Pi / (Fix32)2)
+            {
+                cos = -cos;
+            }
+            return cos;
+        }
+        public static Fix32 SinToCos(Fix32 sin)
+        {
+            return Fix32.Sqrt(Fix32.One - (sin * sin));
+        }
+        public static Fix32 Tan(Fix32 theta)
+        {
+            return Sin(theta) / Cos(theta);
+        }
     }
 }

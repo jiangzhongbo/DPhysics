@@ -1,18 +1,17 @@
 ﻿using UnityEngine;
 using FixedMath;
 
-/// <summary>
-/// Monobehaviour component for circle colliders.
-/// </summary>
-public class CircleComponent : ColliderComponent {
+public class SphereComponent : ColliderComponent
+{
 
-    public Vector2 center;
+    public Vector3 center;
     public float radius;
 
     /// <summary>
     /// Draws the collider as a sphere.
     /// </summary>
-    void OnDrawGizmos() {
+    void OnDrawGizmos()
+    {
         if (radius <= 0 || !drawCollider)
             return;
         Gizmos.color = Color.cyan;
@@ -24,9 +23,10 @@ public class CircleComponent : ColliderComponent {
     /// Generates the "real" collider transforming the current data into fixed point data.
     /// </summary>
     /// <returns>a deterministic circle collider</returns>
-    public override DCollider RequireCollider() {
-        Vector2 global = new Vector2(transform.position.x, transform.position.z);
-        Vector2F ctr = (Vector2F)(global + center);
-        return new DCircleCollider(ctr, (Fix32)radius, isTrigger);
+    public override DCollider RequireCollider()
+    {
+        Vector3 global = transform.position;
+        Vector3F ctr = (Vector3F)(global + center);
+        return new DSphereCollider(ctr, (Fix32)radius, isTrigger, isDebug);
     }
 }

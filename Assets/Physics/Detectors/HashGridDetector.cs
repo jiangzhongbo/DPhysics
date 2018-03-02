@@ -30,17 +30,17 @@ public class HashGridDetector : ICollisionDetector {
     /// </summary>
     /// <param name="obj">the object</param>
     public void Insert(DBody obj) {
-        DBoxCollider box = obj.Collider.GetContainer();
-        Coord min = Hash(box.Min);
-        Coord max = Hash(box.Max);
-        if (!IsInsideBounds(min) || !IsInsideBounds(max))
-            return;
+        DBox3DCollider box = obj.Collider.GetContainer();
+        //Coord min = Hash(box.Min);
+        //Coord max = Hash(box.Max);
+        //if (!IsInsideBounds(min) || !IsInsideBounds(max))
+        //    return;
 
-        for (int i = min.x; i <= max.x; i++) {
-            for (int j = min.y; j <= max.y; j++) {
-                Insert(obj, i, j);
-            }
-        }
+        //for (int i = min.x; i <= max.x; i++) {
+        //    for (int j = min.y; j <= max.y; j++) {
+        //        Insert(obj, i, j);
+        //    }
+        //}
     }
 
     /// <summary>
@@ -48,17 +48,17 @@ public class HashGridDetector : ICollisionDetector {
     /// </summary>
     /// <param name="obj">the rigid body</param>
     public void Remove(DBody obj) {
-        DBoxCollider box = obj.Collider.GetContainer();
-        Coord min = Hash(box.Min);
-        Coord max = Hash(box.Max);
-        if (!IsInsideBounds(min) || !IsInsideBounds(max))
-            return;
+        DBox3DCollider box = obj.Collider.GetContainer();
+        //Coord min = Hash(box.Min);
+        //Coord max = Hash(box.Max);
+        //if (!IsInsideBounds(min) || !IsInsideBounds(max))
+        //    return;
 
-        for (int i = min.x; i <= max.x; i++) {
-            for (int j = min.y; j <= max.y; j++) {
-                Remove(obj, i, j);
-            }
-        }
+        //for (int i = min.x; i <= max.x; i++) {
+        //    for (int j = min.y; j <= max.y; j++) {
+        //        Remove(obj, i, j);
+        //    }
+        //}
     }
 
     /// <summary>
@@ -108,10 +108,11 @@ public class HashGridDetector : ICollisionDetector {
     /// </summary>
     /// <param name="point"></param>
     /// <returns></returns>
-    private Coord Hash(Vector2F point) {
+    private Coord Hash(Vector3F point) {
         int x = (int)(point.x / (Fix32)cellSize);
         int y = (int)(point.y / (Fix32)cellSize);
-        return new Coord(x, y);
+        int z = (int)(point.z / (Fix32)cellSize);
+        return new Coord(x, y, z);
     }
 
     /// <summary>
@@ -155,10 +156,12 @@ public class HashGridDetector : ICollisionDetector {
 public struct Coord {
     public int x;
     public int y;
+    public int z;
 
-    public Coord(int x, int y) {
+    public Coord(int x, int y, int z) {
         this.x = x;
         this.y = y;
+        this.z = z;
     }
 }
 

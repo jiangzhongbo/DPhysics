@@ -8,15 +8,16 @@ public abstract class DCollider {
     private readonly ColliderType type;
     private DBody body;
     private bool isTrigger;
-
+    private bool isDebug;
     /// <summary>
     /// Creates a new collider of the given type.
     /// </summary>
     /// <param name="type">collider type</param>
     /// <param name="isTrigger">true if it is a trigger, false otherwise</param>
-    public DCollider(ColliderType type, bool isTrigger) {
+    public DCollider(ColliderType type, bool isTrigger, bool isDebug) {
         this.type = type;
         this.isTrigger = isTrigger;
+        this.isDebug = isDebug;
     }
 
     /// <summary>
@@ -54,6 +55,12 @@ public abstract class DCollider {
         set { this.isTrigger = value; }
     }
 
+    public bool IsDebug
+    {
+        get { return isDebug; }
+        set { this.isDebug = value; }
+    }
+
     /// <summary>
     /// Checks whether the current collider intersects with the given one.
     /// This function subdivides the call of the specific functions, based on the type of the colliders.
@@ -63,46 +70,50 @@ public abstract class DCollider {
     /// <returns></returns>
     public bool Intersects(DCollider other, out Manifold intersection) {
         switch (other.Type) {
-            case ColliderType.Box:
-                return Intersects((DBoxCollider)other, out intersection);
+            case ColliderType.Box3D:
+                return Intersects((DBox3DCollider)other, out intersection);
             default:
-                return Intersects((DCircleCollider)other, out intersection);
+                return Intersects((DSphereCollider)other, out intersection);
         }
     }
-
 
     /// <summary>
     /// Abstract function to get the position of the collider.
     /// </summary>
     /// <returns>The position of the collider.</returns>
-    public abstract Vector2F GetPosition();
+    public abstract Vector3F GetPosition();
 
+    /// <summary>
+    /// Abstract function to set the position of the collider.
+    /// </summary>
+    /// <param name="pos">the position.</param>
+    public abstract void SetPosition(Vector3F pos);
     /// <summary>
     /// Gets the minimum bounding box for this collider.
     /// if this is already a bounding box, it returns itself.
     /// </summary>
     /// <returns>The minimum bounding box.</returns>
-    public abstract DBoxCollider GetContainer();
+    public abstract DBox3DCollider GetContainer();
 
     /// <summary>
     /// Transforms the current position using the given amount.
     /// </summary>
     /// <param name="translation">the translation.</param>
-    public abstract void Transform(Vector2F translation);
-
-    /// <summary>
-    /// Abstract function for intersections with circles.
-    /// </summary>
-    /// <param name="other">circle collider</param>
-    /// <param name="intersection">collision data</param>
-    /// <returns></returns>
-    public abstract bool Intersects(DCircleCollider other, out Manifold intersection);
+    public abstract void Transform(Vector3F translation);
 
     /// <summary>
     /// Abstract function for intersections with boxes.
     /// </summary>
-    /// <param name="other">box collider.</param>
+    /// <param name="other">box3d collider.</param>
     /// <param name="intersection">collision data.</param>
     /// <returns></returns>
-    public abstract bool Intersects(DBoxCollider other, out Manifold intersection);
+    public abstract bool Intersects(DBox3DCollider other, out Manifold intersection);
+
+    /// <summary>
+    /// Abstract function for intersections with boxes.
+    /// </summary>
+    /// <param name="other">sphere collider.</param>
+    /// <param name="intersection">collision data.</param>
+    /// <returns></returns>
+    public abstract bool Intersects(DSphereCollider other, out Manifold intersection);
 }

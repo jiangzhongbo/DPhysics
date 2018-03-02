@@ -10,16 +10,16 @@ public class DBody {
 
     private DCollider collider;
 
-    private Vector2F position;
-    private Vector2F prevPosition;
-    private Vector2F velocity;
-    private Vector2F force;
+    private Vector3F position;
+    private Vector3F prevPosition;
+    private Vector3F velocity;
+    private Vector3F force;
 
     private Fix32 mass;
     private Fix32 invMass;
     private Fix32 restitution;
     private Fix32 drag;
-
+    private bool isFixed;
     /// <summary>
     /// Creates a new rigid body with the given parameters.
     /// </summary>
@@ -28,7 +28,7 @@ public class DBody {
     /// <param name="mass">the object's mass</param>
     /// <param name="restitution">the "bounciness"</param>
     /// <param name="drag">amount of friction</param>
-    public DBody(DCollider collider, Vector2F position, Fix32 mass, Fix32 restitution, Fix32 drag) {
+    public DBody(DCollider collider, Vector3F position, Fix32 mass, Fix32 restitution, Fix32 drag) {
         this.collider = collider;
         this.position = position;
         this.prevPosition = position;
@@ -37,6 +37,7 @@ public class DBody {
         this.restitution = restitution;
         this.drag = drag;
         this.collider.Body = this;
+        this.isFixed = false;
     }
 
     /// <summary>
@@ -51,7 +52,7 @@ public class DBody {
     /// <summary>
     /// Returns or sets the current velocity.
     /// </summary>
-    public Vector2F Velocity {
+    public Vector3F Velocity {
         get { return velocity; }
         set { velocity = value; }
     }
@@ -59,7 +60,7 @@ public class DBody {
     /// <summary>
     /// Returns the current position.
     /// </summary>
-    public Vector2F Position {
+    public Vector3F Position {
         get { return position; }
     }
 
@@ -79,11 +80,20 @@ public class DBody {
     /// Moves the body and updates the position of the collider.
     /// </summary>
     /// <param name="translation">amount of movement to apply</param>
-    public void Transform(Vector2F translation) {
-        Vector2F difference = position - prevPosition;
+    public void Transform(Vector3F translation) {
+        Vector3F difference = position - prevPosition;
         prevPosition = position;
         collider.Transform(difference);
         position += translation;
+    }
+
+
+    public void SetPosition(Vector3F pos)
+    {
+        prevPosition = position;
+        collider.SetPosition(pos);
+        position = pos;
+        prevPosition = pos;
     }
 
     /// <summary>
@@ -100,6 +110,11 @@ public class DBody {
         get { return this.invMass; }
     }
 
+    public void SetIsFixed(bool isFixed)
+    {
+        this.isFixed = isFixed;
+    }
+
     /// <summary>
     /// Returns the current restitution.
     /// </summary>
@@ -110,7 +125,7 @@ public class DBody {
     /// <summary>
     /// Returns the current applied force on this body.
     /// </summary>
-    public Vector2F Force {
+    public Vector3F Force {
         get { return this.force; }
     }
 
@@ -122,7 +137,7 @@ public class DBody {
     /// Applies a force to the object. The given amount is added to the total amount.
     /// </summary>
     /// <param name="force">vector representing a force</param>
-    public void AddForce(Vector2F force) {
+    public void AddForce(Vector3F force) {
         this.force += force;
     }
 
@@ -130,7 +145,7 @@ public class DBody {
     /// Resets the forces applied to this body.
     /// </summary>
     public void ClearForces() {
-        this.force = Vector2F.Zero;
+        this.force = Vector3F.Zero;
     }
 
     /// <summary>
@@ -146,7 +161,7 @@ public class DBody {
     /// </summary>
     /// <returns>true if the mass is i0, false otherwise.</returns>
     public bool IsFixed() {
-        return mass == Fix32.Zero;
+        return mass == Fix32.Zero || isFixed;
     }
 
     /// <summary>

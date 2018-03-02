@@ -15,25 +15,21 @@ public class DWorld : MonoBehaviour{
     public static readonly Fix32 SQR_EPSILON = EPSILON * EPSILON;
     public static readonly Fix32 PENETRATION_CORRECTION = (Fix32)0.4;
     public static readonly Fix32 PENETRATION_SLOP = (Fix32)0.01;
-    public static readonly Vector2F GRAVITY = new Vector2F(0, 0);
+    public static readonly Vector3F GRAVITY = new Vector3F(new Vector3(0, -9.8f, 0));
     
-    public int sceneWidth;
-    public int sceneHeight;
-    public int cellSize;
     public bool draw;
-
+    public int contactsSize = 0;
     public static float alpha;
     private static DWorld instance;
     private static int bodyCount;
 
     private List<DBody> bodies;
     private HashSet<Manifold> contacts;
-    private ICollisionDetector detector;
+    private SimpleDetector detector;
     private IIntegrator integrator;
     private bool simulate;
 
-    //TODO: remove this
-    private GUIStyle style;
+
 
     /// <summary>
     /// Initializes the engine and sets the instance value.
@@ -42,7 +38,7 @@ public class DWorld : MonoBehaviour{
         instance = this;
         bodyCount = 0;
         bodies = new List<DBody>();
-        detector = new HashGridDetector(cellSize, sceneWidth, sceneHeight);
+        detector = new SimpleDetector();
         integrator = new EulerImplicit();
         contacts = new HashSet<Manifold>();
         simulate = false;
@@ -53,29 +49,18 @@ public class DWorld : MonoBehaviour{
     /// </summary>
     void Start() {
         simulate = true;
-        style = new GUIStyle();
-        style.normal.textColor = Color.white;
-    }
-
-    /// <summary>
-    /// Draws info about the simulation as a GUI.
-    /// </summary>
-    void OnGUI() {
-        Rect label = new Rect(100, 100, 300, 20);
-        GUIStyle style = new GUIStyle();
-        GUI.Label(label, "body count: " + bodyCount, style);
     }
 
     /// <summary>
     /// Draw the detection structure.
     /// </summary>
     void OnDrawGizmos() {
-        Vector3 center = new Vector3(sceneWidth / 2, 0, sceneHeight / 2);
-        Gizmos.color = Color.white;
-        Gizmos.DrawWireCube(center, new Vector3(sceneWidth, 1, sceneHeight));
-        if (detector == null || !draw)
-            return;
-        detector.Draw();
+        //Vector3 center = new Vector3(sceneWidth / 2, 0, sceneHeight / 2);
+        //Gizmos.color = Color.white;
+        //Gizmos.DrawWireCube(center, new Vector3(sceneWidth, 1, sceneHeight));
+        //if (detector == null || !draw)
+        //    return;
+        //detector.Draw();
     }
 
     /// <summary>
@@ -97,6 +82,17 @@ public class DWorld : MonoBehaviour{
         bodyCount++;
         this.bodies.Add(obj);
         detector.Insert(obj);
+    }
+
+    public void AddMainObject(DBody obj)
+    {
+        if (bodyCount > MAX_BODIES)
+            return;
+
+        obj.SetID(bodyCount);
+        bodyCount++;
+        this.bodies.Add(obj);
+        detector.InsertMain(obj);
     }
 
     /// <summary>
@@ -122,6 +118,7 @@ public class DWorld : MonoBehaviour{
 
         Profiler.BeginSample("Find collisions");
         detector.FindCollisions(contacts);
+        contactsSize = contacts.Count;
         Profiler.EndSample();
      
         //init collision manifolds
@@ -141,10 +138,8 @@ public class DWorld : MonoBehaviour{
             if (body.IsFixed())
                 continue;
 
-            Profiler.BeginSample("Remove-Integrate-Insert");
-            detector.Remove(body);
+            Profiler.BeginSample("IntegrateVelocities");
             integrator.IntegrateVelocities(body, delta);
-            detector.Insert(body);
             Profiler.EndSample();
         }
     }

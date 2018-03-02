@@ -5,8 +5,11 @@ using FixedMath;
 /// <summary>
 /// Monobehaviour component used to define a new physics object.
 /// </summary>
-public class DBodyComponent : MonoBehaviour {
+public class DBodyComponent : MonoBehaviour
+{
 
+    public bool isMain = false;
+    public bool isFixed = false;
     public float speed;
 
     public float mass;
@@ -17,27 +20,31 @@ public class DBodyComponent : MonoBehaviour {
     private DBody body;
 
     //TODO: remove this temporary code
-    void Start() {
+    void Start()
+    {
         this.colliderComponent = GetComponent<ColliderComponent>();
         body = new DBody(
             colliderComponent.RequireCollider(),
-            new Vector2F(transform.position),
+            new Vector3F(transform.position),
             (Fix32)mass,
             (Fix32)restitution,
             (Fix32)drag
             );
-        DWorld.Instance.AddObject(body);
+        if (isMain)
+        {
+            DWorld.Instance.AddMainObject(body);
+        }
+        else
+        {
+            DWorld.Instance.AddObject(body);
+        }
 
         //update position
         StartCoroutine(UpdatePosition());
     }
 
-    void Update() {
-        Vector2 direction = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-        if (direction != Vector2.zero) {
-            direction *= 2;
-            body.AddForce(new Vector2F(direction));
-        }
+    void Update()
+    {
 
         //commented this part because of the coroutine
         /*if (body.IsSleeping() || body.IsFixed())
@@ -45,17 +52,26 @@ public class DBodyComponent : MonoBehaviour {
 
         this.transform.position = body.InterpolatedPosition();
         */
+        body.SetIsFixed(isFixed);
     }
 
-    void OnDrawGizmos() {
+    void OnDrawGizmos()
+    {
         /*if (physicsObject == null)
             return;
         Gizmos.color = (physicsObject.IsSleeping()) ? Color.green : Color.white;
         Gizmos.DrawCube(transform.position, Vector3.one * 2);*/
     }
 
-    private IEnumerator UpdatePosition() {
-        while (true) {
+    public DBody GetDBody()
+    {
+        return body;
+    }
+
+    private IEnumerator UpdatePosition()
+    {
+        while (true)
+        {
             if (body.IsFixed())
                 yield return null;
 
